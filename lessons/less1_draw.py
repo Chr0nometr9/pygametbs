@@ -1,6 +1,7 @@
 import pygame
 import sys
 from random import randint
+from math import cos, sin
 
 import pygame.draw
 
@@ -19,7 +20,8 @@ FPS = 60
     print(circ.center)'''
 
 clock = pygame.time.Clock() # створюємо об'єкт для взаємодії з часом
-circle_x, circle_y = 300, 300
+circle_pos = [300, 300] # x, y
+
 
 #Основний цикл програми
 runnig = True
@@ -27,14 +29,19 @@ while runnig:
     for event in pygame.event.get(): # Обробка подій
         if event.type == pygame.QUIT:
             runnig = False 
-
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                circle_pos[0] -= 5
+            if event.key == pygame.K_RIGHT:
+                circle_pos[0] += 5
+            if event.key == pygame.K_UP:
+                circle_pos[1] -= 5
+            if event.key == pygame.K_DOWN:
+                circle_pos[1] += 5
 
     screen.fill((0, 0, 0))
+    pygame.draw.circle(screen, (255, 255, 255), circle_pos, 30)
 
-    circle_x += 1
-    circle_y += 1
-
-    pygame.draw.circle(screen, (255, 255, 255), (circle_x, circle_y), 30)
 
     pygame.display.flip() # Малюємо наступний кадр
     clock.tick(FPS)
