@@ -16,7 +16,7 @@ while runnig:
     for event in pygame.event.get(): # Обробка подій
         if event.type == pygame.QUIT:
             runnig = False 
-
+    
     pygame.display.flip() # Малюємо наступний кадр
 
 
