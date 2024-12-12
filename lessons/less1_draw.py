@@ -21,7 +21,9 @@ FPS = 60
 
 clock = pygame.time.Clock() # створюємо об'єкт для взаємодії з часом
 circle_pos = [300, 300] # x, y
+circle_speed = 5
 
+move_left, move_right = False, False
 
 #Основний цикл програми
 runnig = True
@@ -31,13 +33,19 @@ while runnig:
             runnig = False 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                circle_pos[0] -= 5
+                move_left = True
             if event.key == pygame.K_RIGHT:
-                circle_pos[0] += 5
-            if event.key == pygame.K_UP:
-                circle_pos[1] -= 5
-            if event.key == pygame.K_DOWN:
-                circle_pos[1] += 5
+                move_right = True
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                move_left = False
+            if event.key == pygame.K_RIGHT:
+                move_right = False
+
+    if move_left:
+        circle_pos[0] -= circle_speed
+    if move_right:
+        circle_pos[0] += circle_speed
 
     screen.fill((0, 0, 0))
     pygame.draw.circle(screen, (255, 255, 255), circle_pos, 30)
