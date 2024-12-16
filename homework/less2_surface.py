@@ -52,6 +52,10 @@ while runnig:
     screen.fill((0, 0, 0))
     pygame.draw.polygon(group_surface, (255, 0, 0), [(40, 60), (60, 20), (80, 60)])
     pygame.draw.circle(group_surface, (255, 255, 255), [60, 100], 20)
+    pygame.draw.line(group_surface, (0, 255, 0), (60, 120), (20, 160), 5)
+    pygame.draw.line(group_surface, (0, 255, 0), (60, 120), (100, 160), 5)
+    pygame.draw.line(group_surface, (0, 0, 255), (60, 140), (30, 200), 5)
+    pygame.draw.line(group_surface, (0, 0, 255), (60, 140), (90, 200), 5) 
     screen.blit(group_surface, group_surface_pos)
 
 
