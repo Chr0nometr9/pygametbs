@@ -33,7 +33,6 @@ class MultilineText:
         for line in self.text.split('\n'):
             if not line.strip():
                 self.wrapped_lines.append("")
-                continue
 
             current_line = ""
             for word in line.split(' '):
