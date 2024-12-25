@@ -1,5 +1,6 @@
 import pygame
 from multiline import MultilineText
+from button import Button
 
 pygame.init()
 
@@ -24,16 +25,26 @@ text1 = MultilineText(
     typing_speed=50
 )
 
+button1 = Button("Fight!", font)
+mouse_x, mouse_y = 0, 0
+
+
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEMOTION:
+            mouse_x, mouse_y = event.pos
 
     screen.fill((30, 30, 30))
+    
     text1_surf = text1.render()
     screen.blit(text1_surf, (50, 50))
-    
+    button1_surf = button1.render(mouse_x, mouse_y)
+    screen.blit(button1_surf, (500, 100))
+
+
     pygame.display.flip()
 
 pygame.quit()
