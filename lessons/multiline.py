@@ -4,7 +4,8 @@ class MultilineText:
     def __init__(
         self, 
         text, 
-        font, 
+        font,
+        position, 
         max_width, 
         max_height, 
         text_color=(0, 0, 0), 
@@ -14,6 +15,7 @@ class MultilineText:
     ):
         self.text = text
         self.font = font
+        self.position = position
         self.max_width = max_width
         self.max_height = max_height
         self.text_color = text_color
@@ -63,7 +65,7 @@ class MultilineText:
 
         return typed_lines
 
-    def render(self):
+    def render(self, screen):
         if self.typing_effect:
             now = pygame.time.get_ticks()
             if self._last_time == 0:
@@ -95,4 +97,4 @@ class MultilineText:
             self.surface.blit(r, (0, y))
             y += line_height
 
-        return self.surface
+        screen.blit(self.surface, self.position)

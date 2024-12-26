@@ -26,8 +26,7 @@ text1 = MultilineText(
     typing_speed=50
 )
 
-button1 = Button("Fight!", font)
-mouse_x, mouse_y = 0, 0
+button1 = Button("Fight!", font, position=(500, 100))
 
 
 running = True
@@ -35,11 +34,13 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEMOTION:
-            mouse_x, mouse_y = event.pos
 
+        button1.handle(event)
+        
     screen.fill((30, 30, 30))
+    
     text1.render(screen)
+    button1.render(screen)
 
     pygame.display.flip()
 
