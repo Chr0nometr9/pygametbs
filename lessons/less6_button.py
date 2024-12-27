@@ -26,7 +26,12 @@ text1 = MultilineText(
     typing_speed=50
 )
 
-button1 = Button("Fight!", font, position=(500, 100))
+variable = 50
+
+button1 = Button("Fight!", 
+                font,
+                position=(500, 100), 
+                callback = lambda: print(variable))
 
 
 running = True
@@ -41,6 +46,7 @@ while running:
     
     text1.render(screen)
     button1.render(screen)
+    
 
     pygame.display.flip()
 
