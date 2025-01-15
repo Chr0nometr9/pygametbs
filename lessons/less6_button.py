@@ -33,7 +33,6 @@ button1 = Button("Fight!",
                 position=(500, 100), 
                 callback = lambda: print(variable))
 
-
 running = True
 while running:
     for event in pygame.event.get():
