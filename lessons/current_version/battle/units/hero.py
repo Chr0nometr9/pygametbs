@@ -3,6 +3,7 @@ from units.unit import Unit
 class Hero(Unit):
     def __init__(self, name : str, hp : int, ap : int, max_dmg : int):
         super().__init__(name, hp, max_dmg)
+        self.max_ap = ap
         self.ap = ap
         self.defense = False
         
@@ -20,3 +21,4 @@ class Hero(Unit):
         if self.ap >= 2:
             heal_amount = self.ap // 2
             self.hp += heal_amount
+        self.ap = self.max_ap
