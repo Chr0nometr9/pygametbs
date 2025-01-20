@@ -8,6 +8,9 @@ screen_width, screen_height = 800, 600
 screen = pygame.display.set_mode((screen_width, screen_height))
 font = pygame.font.Font("BF_Mnemonika_Regular.ttf", 32)
 
+clock = pygame.time.Clock()
+FPS = 60
+
 text = """Це приклад багаторядкового тексту, який підтримує перенесення по словам. Також він 
         підтримує символи переносу рядку \n \n Всі слова, які не вміщаються на Surface - обрізаються"""
 
@@ -48,5 +51,6 @@ while running:
     
 
     pygame.display.flip()
+    clock.tick(FPS)
 
 pygame.quit()

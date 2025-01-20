@@ -1,5 +1,3 @@
-from units.hero import Hero
-from units.enemy import Enemy
 from random import choice
 from json import loads
 
@@ -10,12 +8,18 @@ class Battle():
         self.index_turn = 0
         self.state = "HERO_TURN"
         #self.queue = []
-    
+
     def print_state(self):
         for hero in self.heroes:
             print(hero)
         for enemy in self.enemies:
             print(enemy)
+
+    def get_current_unit(self):
+        if self.state == "HERO_TURN":
+            return self.heroes[self.index_turn]
+        elif self.state == "ENEMY_TURN":
+            return self.enemies[self.index_turn]
 
     def process_command(self, command):
         com = command['com']
@@ -24,28 +28,21 @@ class Battle():
             if current_hero.ap >= 5:
                 target_enemy_id = command['target_id']
                 target_enemy = self.enemies[target_enemy_id]
-                current_hero.attack(target_enemy)
-                current_hero.ap -= 5
+                if target_enemy.hp > 0:
+                    current_hero.attack(target_enemy)
+                    current_hero.ap -= 5
         elif com == "def":
             if current_hero.ap >= 3:
                 current_hero.defense = True
                 current_hero.ap -= 3
         elif com == "end":
-            return com
+            self.next_state()
 
-    def process_turn(self):
-        if self.state == "HERO_TURN":
-            end_flag = False
-            while not end_flag:
-                command = loads(input())#self.queue.pop(0)
-                result = self.process_command(command)
-                if result == "end":
-                    end_flag = True
-        elif self.state == "ENEMY_TURN":
-            current_enemy = self.enemies[self.index_turn]
-            target_hero = choice(self.heroes)
-            current_enemy.attack(target_hero)
-
+    def process_enemy_turn(self):
+        current_enemy = self.enemies[self.index_turn]
+        alive_heroes = [hero for hero in self.heroes if hero.hp > 0]
+        target_hero = choice(alive_heroes)
+        current_enemy.attack(target_hero)
         self.next_state()
 
     def next_state(self):
@@ -56,19 +53,19 @@ class Battle():
                 self.index_turn = 0
             else:
                 self.index_turn += 1
-                self.heroes[self.index_turn].rest()
-        if self.state == "ENEMY_TURN":
+            self.heroes[self.index_turn].rest()
+
+        elif self.state == "ENEMY_TURN":
             if self.index_turn == len(self.enemies) - 1:
                 self.state = "HERO_TURN"
                 self.index_turn = 0
             else:
                 self.index_turn += 1
 
-battle = Battle(
-    heroes=[Hero("Герой 1", 10, 8, 10), Hero("Герой 2", 15, 5, 8)],
-    enemies=[Enemy("Ворог 1", 10, 5), Enemy("Ворог 2", 12, 4)]
-)
+        if self.get_current_unit().hp <= 0:
+            self.next_state()
+        else:
+            print(f"Зараз ходить {self.get_current_unit().name}")
+        
 
-battle.process_turn()
-battle.process_turn()
 
