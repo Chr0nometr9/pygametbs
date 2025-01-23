@@ -6,6 +6,7 @@ from battle.battle import Battle
 from battle.units import Hero
 from battle.units import Enemy
 from ui.sprite import Sprite
+from ui.button import Button
 
 # Ініціалізація
 pygame.init()
@@ -20,12 +21,17 @@ FPS = 60
 font = pygame.font.Font("BF_Mnemonika_Regular.ttf", 32)
 
 battle = Battle(
-    heroes=[Hero("Герой 1", 1, 8, 10)],
-    enemies=[Enemy("Ворог 1", 10, 5), Enemy("Ворог 2", 12, 4)]
+    heroes=[Hero("Герой 1", 20, 8, 10), Hero("Герой 2", 15, 8, 12)],
+    enemies=[Enemy("Ворог 1", 15, 5), Enemy("Ворог 2", 10, 4)]
 )
 
 heroes_sprites, enemies_sprites = [], []
 heroes_names, enemies_names = [], []
+
+button1 = Button("Закінчити хід!", 
+                font,
+                position=(300, 500), 
+                callback = lambda: battle.process_command({"com": "end"}))
 
 for i, hero in enumerate(battle.heroes, 1):
     hero_sprite = Sprite(screen, "sprites/hero1/idle.png", [200, int(600*(i/(len(battle.heroes)+1)))])
@@ -48,21 +54,33 @@ while runnig:
     for event in pygame.event.get(): # Обробка подій
         if event.type == pygame.QUIT:
             runnig = False
-        '''if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             for idx, enemy_sprite in enumerate(enemies_sprites):
-                if enemy_sprite.rect().collidepoint(event.pos) and battle.state == "HERO_TURN":
-                    battle.process_command()
-                    battle.process_command('') '''
-    screen.fill((150, 150, 150))
+                if enemy_sprite.get_rect().collidepoint(event.pos) and battle.state == "HERO_TURN":
+                    battle.process_command({"com":"attack", "target_id":idx})
+
+        button1.handle(event)
+
+    screen.fill((100, 100, 100))
     
     for idx, hero_sprite in enumerate(heroes_sprites):
         hero_sprite.draw()
         hero_x, hero_y = hero_sprite.position
         screen.blit(heroes_names[idx], (hero_x - 30, hero_y + 70))
+        hero_hp_text = font.render("HP:"+str(battle.heroes[idx].hp).replace("0", "O"), True, (0, 0, 0))
+        screen.blit(hero_hp_text, (hero_x - 30, hero_y + 110))
+
     for idx, enemy_sprite in enumerate(enemies_sprites):
         enemy_sprite.draw()
         enemy_x, enemy_y = enemy_sprite.position
         screen.blit(enemies_names[idx], (enemy_x - 30, enemy_y + 70))
+        enemy_hp_text = font.render("HP:"+str(battle.enemies[idx].hp).replace("0", "O"), True, (0, 0, 0))
+        screen.blit(enemy_hp_text, (enemy_x - 30, enemy_y + 110))
+
+    button1.render(screen)
+
+    if battle.state == "ENEMY_TURN":
+        battle.process_enemy_turn()
 
     pygame.display.flip() # Малюємо наступний кадр
     clock.tick(FPS)

@@ -39,8 +39,11 @@ class Sprite:
 
         self.current_image = self.original_image
 
-    def rect(self):
-        return self.current_image.get_rect()
+    def get_rect(self):
+        rect = self.current_image.get_rect()
+        rect.center = self.position
+        return rect
+
 
     def draw(self):
         if self.current_animation_name != "Default":
@@ -51,8 +54,8 @@ class Sprite:
         self.current_image = pygame.transform.scale(self.current_image, self.__size)
         if self.mirrored:
             self.current_image = pygame.transform.flip(self.current_image, True, False)
-        rect = self.rect()
-        rect.center = self.position
+
+        rect = self.get_rect()
         self.screen_surface.blit(self.current_image, rect)
 
     def resize(self, new_width, new_height):

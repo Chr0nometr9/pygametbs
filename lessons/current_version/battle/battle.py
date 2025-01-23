@@ -7,7 +7,7 @@ class Battle():
         self.enemies = enemies
         self.index_turn = 0
         self.state = "HERO_TURN"
-        #self.queue = []
+        self.result_queue = []
 
     def print_state(self):
         for hero in self.heroes:
@@ -37,6 +37,8 @@ class Battle():
                 current_hero.ap -= 3
         elif com == "end":
             self.next_state()
+
+
 
     def process_enemy_turn(self):
         current_enemy = self.enemies[self.index_turn]

@@ -15,6 +15,9 @@ class Unit():
     def was_attacked(self, dmg):
         self.hp -= dmg
 
+    def __str__(self):
+        return f"{self.name} ({self.hp} HP)"
+
 class Hero(Unit):
     def __init__(self, name : str, hp : int, ap : int, max_dmg : int):
         super().__init__(name, hp, max_dmg)
