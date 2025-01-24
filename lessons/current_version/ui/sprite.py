@@ -2,7 +2,7 @@ import pygame
 
 class Animation:
     def __init__(self, folder_name : str, count : int, frame_duration : int, loop : bool = True):
-        self.frames = [pygame.image.load(f"images/{folder_name}/{i}.png") for i in range(1, count + 1)]
+        self.frames = [pygame.image.load(f"{folder_name}/{i}.png") for i in range(count)]
         self.frame_duration = frame_duration
         self.loop = loop
         self.count = count
@@ -44,7 +44,6 @@ class Sprite:
         rect.center = self.position
         return rect
 
-
     def draw(self):
         if self.current_animation_name != "Default":
             self.current_image = self.animations[self.current_animation_name].get_current_frame()
@@ -73,9 +72,9 @@ class Sprite:
     def set_mirrored(self, state : bool):
         self.mirrored = state
 
-    def add_animation(self, animation_name : str, count : int, 
+    def add_animation(self, animation_name : str, folder_name : str, count : int, 
                     frame_duration : int, loop : bool = True):
-        self.animations[animation_name] = Animation(animation_name, count, frame_duration, loop)
+        self.animations[animation_name] = Animation(folder_name, count, frame_duration, loop)
 
     def set_animation(self, animation_name : str):
         self.current_animation_name = animation_name

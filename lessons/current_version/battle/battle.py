@@ -7,7 +7,10 @@ class Battle():
         self.enemies = enemies
         self.index_turn = 0
         self.state = "HERO_TURN"
-        self.result_queue = []
+        self.result_cmds_queue = []
+
+    def add_cmd_to_queue(self, command):
+        self.result_cmds_queue.append(command)
 
     def print_state(self):
         for hero in self.heroes:
@@ -31,6 +34,19 @@ class Battle():
                 if target_enemy.hp > 0:
                     current_hero.attack(target_enemy)
                     current_hero.ap -= 5
+
+                    self.add_cmd_to_queue({"com":"play_animation",
+                                            "type":"hero", 
+                                            "id":self.index_turn,
+                                            "animation":"Attack"})
+
+                    self.add_cmd_to_queue({"com":"update_hp",
+                                            "type":"enemy", 
+                                            "id":target_enemy_id,
+                                            "new_hp":target_enemy.hp})
+                    
+                    
+
         elif com == "def":
             if current_hero.ap >= 3:
                 current_hero.defense = True
@@ -38,13 +54,18 @@ class Battle():
         elif com == "end":
             self.next_state()
 
-
-
     def process_enemy_turn(self):
         current_enemy = self.enemies[self.index_turn]
         alive_heroes = [hero for hero in self.heroes if hero.hp > 0]
         target_hero = choice(alive_heroes)
+        target_hero_id = self.heroes.index(target_hero)
         current_enemy.attack(target_hero)
+
+        self.add_cmd_to_queue({"com":"update_hp",
+                                            "type":"hero", 
+                                            "id":target_hero_id,
+                                            "new_hp":target_hero.hp})
+        
         self.next_state()
 
     def next_state(self):
@@ -68,6 +89,6 @@ class Battle():
             self.next_state()
         else:
             print(f"Зараз ходить {self.get_current_unit().name}")
-        
+
 
 
