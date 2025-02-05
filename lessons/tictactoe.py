@@ -16,10 +16,13 @@ o_win_text = font.render("Ноліки перемогли!", True, (0, 0, 0))
 
 screen.fill((255, 255, 255))
 
-pygame.draw.line(screen, (0, 0, 0), (325, 75), (325, 525), 3)
-pygame.draw.line(screen, (0, 0, 0), (475, 75), (475, 525), 3)
-pygame.draw.line(screen, (0, 0, 0), (175, 225), (625, 225), 3)
-pygame.draw.line(screen, (0, 0, 0), (175, 375), (625, 375), 3)
+def draw_grid(screen):
+    pygame.draw.line(screen, (0, 0, 0), (325, 75), (325, 525), 3)
+    pygame.draw.line(screen, (0, 0, 0), (475, 75), (475, 525), 3)
+    pygame.draw.line(screen, (0, 0, 0), (175, 225), (625, 225), 3)
+    pygame.draw.line(screen, (0, 0, 0), (175, 375), (625, 375), 3)
+
+draw_grid(screen)
 
 board_x, board_y = 175, 75
 
@@ -53,6 +56,25 @@ def draw_victory_line(start_line, end_line, frame, screen : pygame.Surface):
 
     pygame.draw.line(screen, (0, 255, 0), start_line, end_segment, 3)
 
+def clear_screen():
+    screen.fill((255, 255, 255))
+    draw_grid(screen)
+
+def draw_restart_button():
+    button_rect = pygame.Rect(0, 0, 200, 50)
+    button_rect.center = (screen_width // 2, screen_height // 2)
+
+    pygame.draw.rect(screen, (192, 192, 192), button_rect)
+
+    text_surface = font.render('Restart', True, (0, 0, 0))
+
+    text_rect = text_surface.get_rect()
+    text_rect.center = button_rect.center
+
+    print("!!!")
+    screen.blit(text_surface, text_rect)
+    return button_rect
+
 def check_victory(board, figure):
     for i in range(3): # перевіряємо чи десь стоять три фігури в ряд
         if board[i] == [figure] * 3:
@@ -80,7 +102,6 @@ def check_victory(board, figure):
     if sub_diag == [figure] * 3:
         start_line = (board_x + 450, board_y)
         end_line = (board_x, board_y + 450)
-        draw_victory_line(start_line, end_line, screen)
         return (start_line, end_line)
 
 board = [
@@ -98,6 +119,8 @@ draw_cross_icon(screen)
 
 clock = pygame.time.Clock()
 
+i = 0
+button_rect = pygame.Rect(0, 0, 1, 1)
 #Основний цикл програми
 runnig = True
 while runnig:
@@ -109,6 +132,7 @@ while runnig:
                 click_x, click_y = event.pos
                 cell_x = (click_x - 175) // 150
                 cell_y = (click_y - 75) // 150
+
                 if 2 >= cell_x >= 0 and 2 >= cell_y >= 0:
                     if not win:
                         if board[cell_y][cell_x] == '_':
@@ -126,7 +150,7 @@ while runnig:
                             else:
                                 board[cell_y][cell_x] = 'o'
                                 draw_circle(cell_x, cell_y, screen)
-                                line_coords = check_victory(board, 'x')
+                                line_coords = check_victory(board, 'o')
                                 if not line_coords is None:
                                     o_win_text_rect = o_win_text.get_rect()
                                     o_win_text_rect.center = (400, 565)
@@ -139,10 +163,27 @@ while runnig:
                             
                             print(board)
 
+                if win:
+                    if button_rect.collidepoint(click_x, click_y):
+                        board = [
+                            ["_", "_", "_"],   #board[0]
+                            ["_", "_", "_"],   #board[1]
+                            ["_", "_", "_"]    #board[2]
+                            ]
+                        win = False
+                        victory_line_frame = 0
+                        tic_turn_flag = True
+                        clear_screen()
+                        i = 0
+
     if win and victory_line_frame < 90:
         start_line, end_line = line_coords
         draw_victory_line(start_line, end_line, victory_line_frame, screen)
         victory_line_frame += 1
+    elif victory_line_frame == 90:
+        if i == 0 :
+            i += 1
+            button_rect = draw_restart_button()
 
     pygame.display.flip() # Малюємо наступний кадр]
     clock.tick(60)
