@@ -44,7 +44,6 @@ def draw_cross(cell_x, cell_y, screen : pygame.Surface):
     pygame.draw.line(screen, (255, 0, 0), left_top_corner, right_bottom_corner, 3)
     pygame.draw.line(screen, (255, 0, 0), left_bottom_corner, right_up_corner, 3)
 
-
 def draw_circle(cell_x, cell_y, screen : pygame.Surface):
     center_cell = (150 * cell_x + 75 + board_x, 150 * cell_y + 75 + board_y)
     pygame.draw.circle(screen, (0, 0, 255), center_cell, 55, 3)
@@ -60,20 +59,6 @@ def clear_screen():
     screen.fill((255, 255, 255))
     draw_grid(screen)
 
-def draw_restart_button():
-    button_rect = pygame.Rect(0, 0, 200, 50)
-    button_rect.center = (screen_width // 2, screen_height // 2)
-
-    pygame.draw.rect(screen, (192, 192, 192), button_rect)
-
-    text_surface = font.render('Restart', True, (0, 0, 0))
-
-    text_rect = text_surface.get_rect()
-    text_rect.center = button_rect.center
-
-    print("!!!")
-    screen.blit(text_surface, text_rect)
-    return button_rect
 
 def check_victory(board, figure):
     for i in range(3): # перевіряємо чи десь стоять три фігури в ряд
@@ -112,15 +97,19 @@ board = [
 
 tic_turn_flag = True
 win = False
-
 victory_line_frame = 0
 
 draw_cross_icon(screen)
 
+button_rect = pygame.Rect(0, 0, 200, 50)
+button_rect.center = (screen_width // 2, screen_height // 2)
+text_surface = font.render('Restart', True, (0, 0, 0))
+text_rect = text_surface.get_rect()
+text_rect.center = button_rect.center
+button_visible = False
+
 clock = pygame.time.Clock()
 
-i = 0
-button_rect = pygame.Rect(0, 0, 1, 1)
 #Основний цикл програми
 runnig = True
 while runnig:
@@ -163,29 +152,32 @@ while runnig:
                             
                             print(board)
 
-                if win:
-                    if button_rect.collidepoint(click_x, click_y):
+                if button_visible and button_rect.collidepoint(click_x, click_y):
                         board = [
                             ["_", "_", "_"],   #board[0]
                             ["_", "_", "_"],   #board[1]
                             ["_", "_", "_"]    #board[2]
                             ]
+
                         win = False
                         victory_line_frame = 0
                         tic_turn_flag = True
+                        button_visible = False
                         clear_screen()
-                        i = 0
+                        draw_cross_icon(screen)
+                        
 
     if win and victory_line_frame < 90:
         start_line, end_line = line_coords
         draw_victory_line(start_line, end_line, victory_line_frame, screen)
         victory_line_frame += 1
     elif victory_line_frame == 90:
-        if i == 0 :
-            i += 1
-            button_rect = draw_restart_button()
+        if not button_visible:
+            pygame.draw.rect(screen, (192, 192, 192), button_rect)
+            screen.blit(text_surface, text_rect)
+            button_visible = True
 
-    pygame.display.flip() # Малюємо наступний кадр]
+    pygame.display.flip() # Малюємо наступний кадр
     clock.tick(60)
 
 
