@@ -1,7 +1,55 @@
 import pygame
 import sys
+import random
 
 dt = 0.01
+
+class Enemy():
+    last_spawn = 0
+    velocity_abs = 3
+    
+    def __init__(self, target_x, target_y):
+        side = random.choice(["top", "bottom", "left", "right"])
+        self.hp = 10
+
+        if side == "top":
+            self.x = random.randint(0, screen_width)
+            self.y = -100
+
+        if side == "bottom":
+            self.x = random.randint(0, screen_width)
+            self.y = screen_height + 100
+
+        if side == "left":
+            self.x = -100
+            self.y = random.randint(0, screen_height)
+            
+        if side == "right":
+            self.x = screen_width + 100
+            self.y = random.randint(0, screen_height)
+        
+        self.direction_vector = pygame.math.Vector2(target_x - self.x, target_y - self.y)
+        self.velocity_vector = self.direction_vector.copy()
+        self.velocity_vector.scale_to_length(self.velocity_abs)
+        self.sprite = pygame.transform.rotate(pygame.image.load("enemy.png"), self.direction_vector.angle_to((0, 1)))
+
+    def draw(self, screen):
+        self.rect = self.sprite.get_rect()
+        self.rect.center = self.x, self.y
+        screen.blit(self.sprite, self.rect)
+        # hpbar_rect = pygame.Rect((0, 0), (self.hp, 10))
+        # hpbar_rect.center = (self.get_rect().centerx, self.get_rect().centery + 80)
+        # pygame.draw.rect(screen, (0, 255, 0), hpbar_rect)
+
+    def update(self):
+        self.x += self.velocity_vector.x
+        self.y += self.velocity_vector.y
+
+    def handle_event(self, event):
+        pass
+
+    def is_on_screen(self, screen_width, screen_height):
+        return (-100 < self.x < screen_width + 100) and (-100 < self.y < screen_height + 100)
 
 class Rocket:
     def __init__(self, start_x, start_y, direction_vector):
@@ -23,6 +71,9 @@ class Rocket:
         self.x += self.velocity_vector.x
         self.y += self.velocity_vector.y
 
+    def is_on_screen(self, screen_width, screen_height):
+        return (-100 < self.x < screen_width + 100) and (-100 < self.y < screen_height + 100)
+        
 class Player:
     def __init__(self, start_x, start_y):
         self.x, self.y = start_x, start_y
@@ -103,12 +154,26 @@ while runnig:
             obj.handle_event(event)
     
     screen.fill((0,0,0))
+    
+    now = pygame.time.get_ticks()
+    if now - Enemy.last_spawn >= 1000:
+        objects.append(Enemy(player.x, player.y))
+        Enemy.last_spawn = now
+
+    next_frame_objects = [player]
+
     for obj in objects:
         obj.update()
         obj.draw(screen)
 
+        if isinstance(obj, (Rocket, Enemy)):
+            if obj.is_on_screen(screen_width, screen_height):
+                next_frame_objects.append(obj)
+
     pygame.display.flip() # Малюємо наступний кадр
     clock.tick(FPS)
+
+    objects = next_frame_objects
 
 
 #Завершення програми
