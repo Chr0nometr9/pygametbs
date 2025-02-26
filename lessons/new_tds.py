@@ -32,6 +32,9 @@ class Player:
         self.angle = 0
         self.move = False
 
+        self.last_shot_time = 0
+        self.shot_cooldown = 500
+
         self.direction_vector = pygame.math.Vector2(1, 0)
         self.velocity_vector = pygame.math.Vector2(0, 0)
         self.acceleration_vector = pygame.math.Vector2(0, 0)
@@ -58,9 +61,12 @@ class Player:
                 self.move = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                objects.append(Rocket(self.x + self.direction_vector.x * 60, 
-                                      self.y + self.direction_vector.y * 60, 
-                                      self.direction_vector))
+                now = pygame.time.get_ticks()
+                if now - self.last_shot_time >= self.shot_cooldown:
+                    objects.append(Rocket(self.x + self.direction_vector.x * 60, 
+                                        self.y + self.direction_vector.y * 60, 
+                                        self.direction_vector))
+                    self.last_shot_time = now
                 
     def update(self):
         if self.move:
