@@ -4,9 +4,11 @@ import random
 
 dt = 0.01
 
+
 class Enemy():
     last_spawn = 0
     velocity_abs = 3
+    spawn_duration = 2000
     
     def __init__(self, target_x, target_y):
         side = random.choice(["top", "bottom", "left", "right"])
@@ -14,7 +16,7 @@ class Enemy():
 
         if side == "top":
             self.x = random.randint(0, screen_width)
-            self.y = -100
+            self.y = -100 # спавнимо ворога на 100 пікселів вище верхньої межі ігрового рівня
 
         if side == "bottom":
             self.x = random.randint(0, screen_width)
@@ -32,6 +34,7 @@ class Enemy():
         self.velocity_vector = self.direction_vector.copy()
         self.velocity_vector.scale_to_length(self.velocity_abs)
         self.sprite = pygame.transform.rotate(pygame.image.load("enemy.png"), self.direction_vector.angle_to((0, 1)))
+        self.mask = pygame.mask.from_surface(self.sprite)
 
     def draw(self, screen):
         self.rect = self.sprite.get_rect()
@@ -50,14 +53,19 @@ class Enemy():
 
     def is_on_screen(self, screen_width, screen_height):
         return (-100 < self.x < screen_width + 100) and (-100 < self.y < screen_height + 100)
+    
+    def get_rect(self):
+        return self.sprite.get_rect(center = (self.x, self.y))
+
 
 class Rocket:
     def __init__(self, start_x, start_y, direction_vector):
         self.x, self.y = start_x, start_y
         self.velocity_vector = direction_vector.copy()
-        self.velocity = 3
-        self.velocity_vector.scale_to_length(self.velocity)
+        self.velocity_abs = 3
+        self.velocity_vector.scale_to_length(self.velocity_abs)
         self.sprite = pygame.transform.rotate(pygame.image.load("bullet.png"), direction_vector.angle_to((0, -1)))
+        self.mask = pygame.mask.from_surface(self.sprite)
 
     def handle_event(self, event):
         pass
@@ -73,7 +81,10 @@ class Rocket:
 
     def is_on_screen(self, screen_width, screen_height):
         return (-100 < self.x < screen_width + 100) and (-100 < self.y < screen_height + 100)
-        
+    
+    def get_rect(self):
+        return self.sprite.get_rect(center = (self.x, self.y))
+
 class Player:
     def __init__(self, start_x, start_y):
         self.x, self.y = start_x, start_y
@@ -91,12 +102,16 @@ class Player:
         self.acceleration_vector = pygame.math.Vector2(0, 0)
 
         self.sprite = pygame.image.load("ship.png")
+        self.current_sprite = self.sprite
     
+    def get_mask(self):
+        return pygame.mask.from_surface(self.current_sprite)
+
+    def get_rect(self):
+        return self.current_sprite.get_rect(center = (self.x, self.y))
+
     def draw(self, screen):
-        current_sprite = pygame.transform.rotate(self.sprite, self.angle)
-        rect = current_sprite.get_rect()
-        rect.center = self.x, self.y
-        screen.blit(current_sprite, rect)
+        screen.blit(self.current_sprite, self.get_rect())
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEMOTION:
@@ -114,12 +129,27 @@ class Player:
             if event.button == 1:
                 now = pygame.time.get_ticks()
                 if now - self.last_shot_time >= self.shot_cooldown:
-                    objects.append(Rocket(self.x + self.direction_vector.x * 60, 
-                                        self.y + self.direction_vector.y * 60, 
-                                        self.direction_vector))
+
+                    # вектори зміщення для лівої і правої ракети
+
+                    left_rocket_pos_vector = pygame.math.Vector2(-45, 0).rotate(90 - self.direction_vector.angle_to((1, 0)))
+                    right_rocket_pos_vector = pygame.math.Vector2(45, 0).rotate(90 - self.direction_vector.angle_to((1, 0)))
+
+                    # додаємо дві ракети (ліворуч і праворуч)
+                    
+                    objects.extend([Rocket(self.x + right_rocket_pos_vector.x + self.direction_vector.x * 60, 
+                                        self.y + right_rocket_pos_vector.y + self.direction_vector.y * 60,
+
+                                        self.direction_vector),
+                                    Rocket(self.x + left_rocket_pos_vector.x + self.direction_vector.x * 60, 
+                                        self.y + left_rocket_pos_vector.y + self.direction_vector.y * 60, 
+
+                                        self.direction_vector)])
+                    
                     self.last_shot_time = now
                 
     def update(self):
+        self.current_sprite = pygame.transform.rotate(self.sprite, self.angle)
         if self.move:
             self.acceleration_vector = self.direction_vector.copy()
             self.acceleration_vector.scale_to_length(self.acceleration_abs)
@@ -156,9 +186,23 @@ while runnig:
     screen.fill((0,0,0))
     
     now = pygame.time.get_ticks()
-    if now - Enemy.last_spawn >= 1000:
+    if now - Enemy.last_spawn >= Enemy.spawn_duration:
         objects.append(Enemy(player.x, player.y))
         Enemy.last_spawn = now
+
+    rockets = [obj for obj in objects if isinstance(obj, Rocket)]
+    enemies = [obj for obj in objects if isinstance(obj, Enemy)]
+
+    for enemy in enemies:
+        for rocket in rockets:
+            offset = rocket.get_rect().x - enemy.get_rect().x, rocket.get_rect().y - enemy.get_rect().y 
+            if enemy.mask.overlap(rocket.mask, offset):
+                enemy.x = rocket.x = -1000 # за межі ігрового рівня для подальшого автоматичного видалення
+
+        offset = player.get_rect().x - enemy.get_rect().x, player.get_rect().y - enemy.get_rect().y 
+        if enemy.mask.overlap(player.get_mask(), offset):
+            enemy.x = -1000
+
 
     next_frame_objects = [player]
 
